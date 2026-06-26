@@ -13,8 +13,6 @@ polished and verified by the authors.
 Lean using our agentic Lean formalization pipeline (linked below; source only,
 `.lake` build artifacts excluded).
 
-> ⚠️ These are machine-generated arguments that the authors have checked. Please
-> verify them independently before citing or relying on them.
 
 ## Open problems answered
 
