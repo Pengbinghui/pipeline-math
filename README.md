@@ -23,6 +23,7 @@ merged into a single paper over time.
 ### COLT open-problem track
 
 - **Shuffled SGD — the SS–RS–GD inequalities** (Yun, Sra, Jadbabaie, COLT 2021) — [paper](papers/ss-rs-gd.pdf)
+- **Learning measured-output quantum circuits** (Kun and Reyzin, COLT 2015) - [paper](papers/quantum-circuit-viq.pdf) (Partial solution).
 - **Unweighted data selection for linear regression** (Hanneke, Moran, Shlimovich, Yehudayoff, COLT 2025) — [paper](papers/data-selection.pdf)
 - **Robust conditional probability estimation** (Langford, COLT 2010) — [paper](papers/conditional-probability.pdf)
 
