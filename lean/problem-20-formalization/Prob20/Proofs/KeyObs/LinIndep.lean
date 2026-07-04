@@ -41,13 +41,12 @@ Everything else is `sorry`-free in `KeyObs/Valuation.lean`:
   (`res0`/`res1` give `0 = 1` after cancelling one `π`);
 * `three_not_mem_of_L` : the three non-memberships `p, tp, (t+1)p ∉ 𝔪·Int(D)`.
 
-The remaining gap is therefore **exactly `L`**, unconditionally.  `L` is *true*
+Everything is therefore reduced to the single fact `L`.  `L` is *true*
 for this two-place pullback `D` but its single-place analogue is *false* (the
 `(X²+X)/t` binomial obstruction: it is integer-valued at one place yet `g(π) ∉ D`
-fails the other place), so a proof needs the fixed-divisor theory of
-integer-valued polynomials over the node, not currently in Mathlib.  A follow-up
-that supplies `L_proof : <hL's type>` closes the frozen theorem by
-`p_tp_linindep_proof := p_tp_linindep_of_L L_proof`.  See `PROGRESS.md`.
+fails the other place), so its proof needs the fixed-divisor / two-place structure.
+`L` is discharged unconditionally as `L_proof` in `CruxL.lean`, and
+`p_tp_linindep_proof := p_tp_linindep_of_L L_proof` closes the frozen theorem.
 -/
 
 namespace Prob20.Proofs.KeyObs
@@ -106,10 +105,10 @@ hold (`three_not_mem_of_L` in `Valuation.lean`, proved sorry-free via the
 divided-difference functional + the `𝔪 ⊆ πT` valuation detector), and feeding
 them to `p_tp_linindep_of_not_mem` yields the frozen statement.
 
-This isolates the entire remaining gap into `hL`.  `L` is **true** for this
-two-place pullback `D` but its proof needs the fixed-divisor theory of
-integer-valued polynomials (its single-place analogue is *false* — the
-`(X²+X)/t` binomial obstruction), which is not in Mathlib.  See `PROGRESS.md`. -/
+This isolates everything into `hL`.  `L` is **true** for this two-place pullback
+`D` (its single-place analogue is *false* — the `(X²+X)/t` binomial obstruction —
+so its proof needs the two-place fixed-divisor structure), and it is discharged
+unconditionally as `L_proof` in `CruxL.lean`. -/
 theorem p_tp_linindep_of_L
     (hL : ∀ n : ↥(IntPoly Dom Kt), ∃ w : Dom, w ∈ mIdeal ∧
         algebraMap Dom Kt w =

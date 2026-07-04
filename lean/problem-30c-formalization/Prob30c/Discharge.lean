@@ -21,9 +21,9 @@ is proved, this file adds an `example : @Frozen = @Proof := rfl`, which compiles
 **iff** the proven version has *exactly* the frozen proposition — a
 machine-checked guarantee that no statement drifted and nothing was weakened.
 
-SETUP-stage stub: no proofs exist yet (all frozen statements are `sorry`), so the
-no-drift `rfl` gates are added by the Wrap/Discharge agent. This file must stay
-`sorry`-free and compile.
+All ten frozen theorems are proved: `Proofs/**` supplies each `*_proof`, and the
+ten no-drift `@Frozen = @Proof := rfl` gates below are in place. This file stays
+`sorry`-free and compiles.
 -/
 
 namespace Prob30c

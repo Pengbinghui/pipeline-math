@@ -23,9 +23,8 @@ proposition, so this file is simultaneously the no-drift certificate and the
 clean, named result that `verify.sh` audits via
 `#print axioms Prob30c.Solution.<name>`.
 
-SETUP-stage stub: no proofs exist yet (all frozen statements are `sorry`), so the
-ten restated theorems are added by the Wrap/Discharge agent as each proof lands.
-This file must stay `sorry`-free and compile.
+All ten frozen statements are proved: each is restated below and bound to its
+sorry-free `*_proof` from `Proofs/`. This file stays `sorry`-free and compiles.
 -/
 
 namespace Prob30c.Solution

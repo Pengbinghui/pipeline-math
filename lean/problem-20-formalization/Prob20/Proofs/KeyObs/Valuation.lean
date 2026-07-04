@@ -18,10 +18,10 @@ This file supports `LinIndep.lean` by providing, **`sorry`-free**:
 
   > `L : ∀ g ∈ Int(D), g(π) − g(0) ∈ ι(𝔪)`   (i.e. `resD (g(π)) = resD (g(0))`).
 
-  `L` is the genuine, documented blocker (see `PROGRESS.md`): its single-place
-  analogue is *false* (the `(X²+X)/t` binomial obstruction), so it needs the
-  two-place fixed-divisor structure, which is not currently in Mathlib.  Here we
-  reduce *everything else* to `L`, so a follow-up only needs to discharge `L`.
+  `L` is the crux fact: its single-place analogue is *false* (the `(X²+X)/t`
+  binomial obstruction), so it needs the two-place fixed-divisor structure.  Here
+  we reduce *everything else* to `L`; `L` itself is discharged unconditionally as
+  `L_proof` in `CruxL.lean` (a two-place CRT / divisibility argument).
 
 The reduction: from a representation `p = Σ mᵢ·fᵢ ∈ 𝔪·Int(D)`, evaluating at
 `π` and `0` and subtracting gives `δ(p) := p(π) − p(0) ∈ ι(𝔪²)` (via

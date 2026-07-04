@@ -157,7 +157,8 @@ theorem g_usq_not_mem (N : ℕ) :
 The image of `θ₂` is spanned by separated products `f(X₀)·h(X₁)`.  Applying the
 finite-difference functional `Δ_a` to such a product telescopes to
 `(f(a)−f(0))·(h(a)−h(0))`.  With `a = u_N` and `N` large, each factor lies in `𝔪`
-(this is the **crux lemma `KEY`**, the only remaining gap), so `Δ_{u_N}(θ₂ τ) ∈ 𝔪²`
+(this is the **crux lemma `KEY`**, discharged unconditionally by `KEY_proof` in
+`Place1.lean`), so `Δ_{u_N}(θ₂ τ) ∈ 𝔪²`
 for every `τ`.  But `Δ_{u_N}(P) = g(u_N²) ∉ 𝔪²` (place-0 computation above) —
 contradiction. -/
 
@@ -265,9 +266,9 @@ theorem theta2_missing_not_range
   exact g_usq_not_mem N₀ ⟨w, hw, hweq⟩
 
 /-!
-### The single remaining gap : the crux lemma `KEY`
+### The crux lemma `KEY` (discharged in `Place1.lean`)
 
-`theta2_missing` is now reduced (sorry-free, clean axioms) to the hypothesis
+`theta2_missing` is reduced here (sorry-free, clean axioms) to the hypothesis
 
 > `KEY : ∀ f ∈ Int(D), ∃ N₀, ∀ N ≥ N₀, f(u_N) − f(0) ∈ 𝔪`     (with `u_N = π(t+1)^N`).
 
@@ -286,16 +287,15 @@ This is **strictly more tractable than the Stage-2.2 lemma `L`**: `L` is at the
 whereas `KEY` lets `N → ∞`, so a *one-place* (place-`t=1`) pole-killing estimate
 plus the `D`-equalizer transfer `res0 = res1` suffices — no compatibility lemma.
 
-**What a follow-up needs.**  A place-`t=1` valuation `v₁` on `Kt = 𝔽₂(t)` (e.g. via
-`IsDedekindDomain.HeightOneSpectrum` for the prime `(t+1)` of `𝔽₂[t]`, or
-`RatFunc`'s order at `1`), the characterization `T = {x : v₀ x ≥ 0 ∧ v₁ x ≥ 0}`,
-the bound `v₁(d_N/(t+1)) ≥ 0` for `N` large, and `res1 (t1T * y) = 0`
-(`t1T = (t+1) : T`, `res1 t1T = 0`).  Discharge `KEY`, then
-`theta2_missing_proof := theta2_missing_of_KEY KEY_proof` is the frozen statement.
+**Status: discharged.**  `KEY` is proved unconditionally as `KEY_proof` in
+`Place1.lean` (the place-`t=1` valuation / pole-order argument sketched above), so
+`theta2_missing_proof := theta2_missing_of_KEY KEY_proof` (`Place1.lean`) is the
+frozen statement — no remaining gap.
 -/
 
 /-- **`theta2_missing`, conditional on the crux lemma `KEY`.**  This is the full
-frozen statement, modulo the single remaining place-1 valuation gap `KEY`. -/
+frozen statement, modulo `KEY` — which is supplied unconditionally by `KEY_proof`
+in `Place1.lean`, so the composed `theta2_missing_proof` there is unconditional. -/
 theorem theta2_missing_of_KEY
     (hKEY : ∀ f : ↥(IntPoly Dom Kt), ∃ N₀ : ℕ, ∀ N, N₀ ≤ N →
         ∃ w : Dom, w ∈ mIdeal ∧ algebraMap Dom Kt w
