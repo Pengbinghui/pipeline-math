@@ -14,7 +14,7 @@ Lean using our agentic Lean formalization pipeline, fully automated, open source
 
 ## News
 
-- **2026-07-08:** Added write-up for the COLT 2025 open problem on **fixed-parameter tractability of zonotope problems** — Euclidean norm maximization over zonotopes is W[1]-hard — [paper](papers/zonotope.pdf).
+- **2026-07-08:** Added write-up for the COLT 2025 open problem on **fixed-parameter tractability of zonotope problems** [paper](papers/zonotope.pdf).
 - **2026-06-28:** Added write-up for Erdős **Problem 477** (tiling complement) — [paper](papers/tiling-complement.pdf).
 
 <!--
