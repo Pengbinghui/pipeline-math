@@ -52,6 +52,6 @@ merged into a single paper over time.
 - **Problem 30(c)** — [paper](papers/absorb.pdf), [Lean](lean/problem-30c-formalization/)
 
 ### Graph theory
-- **Minimum edge-outerplanar embeddings are poly-time computable problem** - ([paper](papers/k_edge_outerplanar.pdf)).
+- **Minimum edge-outerplanar embeddings are poly-time computable problem** - [paper](papers/k_edge_outerplanar.pdf).
 
 
