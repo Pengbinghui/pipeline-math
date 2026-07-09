@@ -29,6 +29,9 @@ Each problem links to its current write-up and, where available, a
 machine-checked Lean 4 formalization. Write-ups are uploaded gradually and may be
 merged into a single paper over time.
 
+### Erdős problems
+- **Problem 477:** tiling complement  — [paper](papers/tiling-complement.pdf)
+
 ### COLT open-problem track
 
 - **Shuffled SGD — the SS–RS–GD inequalities** (Yun, Sra, Jadbabaie, COLT 2021) — [paper](papers/ss-rs-gd.pdf)
@@ -48,5 +51,7 @@ merged into a single paper over time.
 - **Problem 27:** integer-valued polynomials over algebras (Werner) — [paper](papers/noncomm.pdf), [Lean (27b)](lean/problem-27b-form/)
 - **Problem 30(c)** — [paper](papers/absorb.pdf), [Lean](lean/problem-30c-formalization/)
 
-### Erdős problems
-- **Problem 477:** tiling complement  — [paper](papers/tiling-complement.pdf)
+### Graph theory
+- **Minimum edge-outerplanar embeddings are poly-time computable problem** - ([paper](papers/k_edge_outerplanar.pdf)).
+
+
