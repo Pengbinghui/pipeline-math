@@ -9,11 +9,11 @@ prover–verifier pipeline; the papers are
 polished and verified by the authors.
 
 **Formalization.** We also formalize the commutative ring theory solutions in
-Lean using our agentic Lean formalization pipeline, fully automated, open source soon!
+Lean using our agentic Lean formalization pipeline, which is available here: ([repo](https://github.com/hregahego/LEAN-formalization-loop))
 
 
 ## News
-
+- **2026-07-09:** Open-sourced our LEAN formalization pipeline.
 - **2026-07-08:** Added write-up for the COLT 2025 open problem on **fixed-parameter tractability of zonotope problems** ([paper](papers/zonotope.pdf)) and **minimum edge-outerplanar embeddings are poly-time computable** ([paper](papers/k_edge_outerplanar.pdf)).
 - **2026-06-28:** Added write-up for Erdős **Problem 477** (tiling complement) — [paper](papers/tiling-complement.pdf).
 
