@@ -14,7 +14,7 @@ Lean using our agentic Lean formalization pipeline, fully automated, open source
 
 ## News
 
-- **2026-07-08:** Added write-up for the COLT 2025 open problem on **fixed-parameter tractability of zonotope problems** ([paper](papers/zonotope.pdf)). and the **minimum edge-outerplanar embeddings are poly-time computable problem** ([paper](papers/k_edge_outerplanar.pdf)).
+- **2026-07-08:** Added write-up for the COLT 2025 open problem on **fixed-parameter tractability of zonotope problems** ([paper](papers/zonotope.pdf)) and **minimum edge-outerplanar embeddings are poly-time computable** ([paper](papers/k_edge_outerplanar.pdf)).
 - **2026-06-28:** Added write-up for Erdős **Problem 477** (tiling complement) — [paper](papers/tiling-complement.pdf).
 
 <!--
@@ -52,6 +52,6 @@ merged into a single paper over time.
 - **Problem 30(c)** — [paper](papers/absorb.pdf), [Lean](lean/problem-30c-formalization/)
 
 ### Graph theory
-- **Minimum edge-outerplanar embeddings are poly-time computable problem** - [paper](papers/k_edge_outerplanar.pdf).
+- **Minimum edge-outerplanar embeddings are poly-time computable** - [paper](papers/k_edge_outerplanar.pdf).
 
 
