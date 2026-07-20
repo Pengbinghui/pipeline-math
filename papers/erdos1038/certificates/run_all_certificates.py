@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Run every certificate used by the Erdős 1038 manuscript."""
+"""Run every certificate used by the current manuscript.
+
+The driver writes each program's combined stdout/stderr to ``logs/`` and stops
+on the first nonzero exit status.  The logs are generated locally; they are not
+assumed to be pre-existing repository files.
+"""
 
 from __future__ import annotations
 
@@ -38,6 +43,7 @@ def main() -> None:
         print(f"=== {name} ===", flush=True)
         result = subprocess.run(
             command,
+            cwd=ROOT,
             env=env,
             text=True,
             stdout=subprocess.PIPE,
@@ -45,9 +51,11 @@ def main() -> None:
             check=False,
         )
         print(result.stdout, end="")
-        (LOGS / f"{name}.log").write_text(result.stdout)
+        (LOGS / f"{name}.log").write_text(result.stdout, encoding="utf-8")
         if result.returncode:
             raise SystemExit(f"{name} failed with exit status {result.returncode}")
+        if "PASS:" not in result.stdout:
+            raise SystemExit(f"{name} returned successfully but printed no PASS marker")
 
     print("PASS: all certificates")
 
