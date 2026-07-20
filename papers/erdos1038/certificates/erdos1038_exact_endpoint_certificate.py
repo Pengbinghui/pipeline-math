@@ -1,42 +1,61 @@
 #!/usr/bin/env python3
-"""Rigorous Arb certificate for the endpoint inequalities in Lemma 5.1.
+"""Rigorous Arb certificate for the endpoint inequalities in Lemma 6.1.
 
-The program evaluates the explicit endpoint formulas with second-order
-automatic-differentiation jets.  It proves the inequalities on rational boxes
-using interval Taylor bounds and adaptive subdivision.  The only infinite
-series is Phi(y)=sum y^n/(2n+1); value and first two derivative tails are added
-as rigorous symmetric Arb errors.
+This program evaluates the manuscript's explicit functions
+
+    R(r,h,C) = U_{lambda_{T_R,C}}(alpha),
+    L(r,h,C) = U_{lambda_{T_L,C}}(-1)
+
+through their algebraic continuations and certifies every inequality stated in
+``lem:endpoint-computer``.  It uses second-order automatic-differentiation
+jets, rational box subdivision, and interval Taylor bounds.  The only infinite
+series is
+
+    Phi(y) = sum_{n>=0} y^n/(2n+1),
+
+and rigorous tails are added for its value and first two derivatives.
+
+The exact parameter balls for alpha and D are imported from
+``contact_existence.py``.  Consequently the endpoint calculation uses the
+same rigorous enclosures as the parameter-triple existence certificate; there
+is no unchecked decimal handoff between the two scripts.
 
 All pass/fail decisions use outward-rounded python-flint Arb arithmetic.
 """
+
 from __future__ import annotations
 
 import argparse
 import os
+from collections import deque
 from dataclasses import dataclass
 from fractions import Fraction
-from collections import deque
 
 from flint import arb, ctx
 
+from contact_existence import certified_parameter_enclosures
+
 BITS = int(os.environ.get("ERDOS1038_ARB_BITS", "384"))
 ctx.prec = BITS
+
 SERIES_TERMS = int(os.environ.get("ERDOS1038_PHI_TERMS", "40"))
 MAX_DEPTH = int(os.environ.get("ERDOS1038_ENDPOINT_MAX_DEPTH", "22"))
-
-# These balls are deliberately much wider than the Krawczyk enclosure.
-ALPHA = arb("0.804461754260998666841640107869", "1e-26")
-D = arb("1.834430475762661711090753635125", "1e-26")
 BOUND = Fraction(127, 1000)
+
+PARAMETERS = certified_parameter_enclosures()
+ALPHA = PARAMETERS["alpha"]
+D = PARAMETERS["D"]
 
 
 def exact(q: Fraction | int) -> arb:
+    """Convert an integer or rational to an exact Arb point ball."""
     if isinstance(q, int):
         return arb(q)
     return arb(q.numerator) / q.denominator
 
 
 def interval(lo: Fraction, hi: Fraction) -> arb:
+    """Return an Arb interval containing the two exact rational endpoints."""
     return exact(lo).union(exact(hi))
 
 
@@ -50,6 +69,8 @@ def abs_upper(x: arb) -> arb:
 
 @dataclass
 class Jet2:
+    """Value, gradient, and Hessian in the variables (r,h)."""
+
     v: arb
     g: tuple[arb, arb]
     H: tuple[tuple[arb, arb], tuple[arb, arb]]
@@ -75,13 +96,20 @@ class Jet2:
         return Jet2(
             self.v + o.v,
             tuple(self.g[i] + o.g[i] for i in range(2)),
-            tuple(tuple(self.H[i][j] + o.H[i][j] for j in range(2)) for i in range(2)),
+            tuple(
+                tuple(self.H[i][j] + o.H[i][j] for j in range(2))
+                for i in range(2)
+            ),
         )
 
     __radd__ = __add__
 
     def __neg__(self):
-        return Jet2(-self.v, tuple(-x for x in self.g), tuple(tuple(-x for x in row) for row in self.H))
+        return Jet2(
+            -self.v,
+            tuple(-x for x in self.g),
+            tuple(tuple(-x for x in row) for row in self.H),
+        )
 
     def __sub__(self, other):
         return self + (-Jet2.coerce(other))
@@ -131,7 +159,7 @@ class Jet2:
 
     def sqrt(self):
         root = self.v.sqrt()
-        return self.unary(root, 1 / (2 * root), -1 / (4 * root * root * root))
+        return self.unary(root, 1 / (2 * root), -1 / (4 * root**3))
 
     def log(self):
         return self.unary(self.v.log(), 1 / self.v, -1 / (self.v * self.v))
@@ -163,6 +191,7 @@ def phi_series(y: Jet2) -> Jet2:
         (N - 1) * q ** (N - 2) / (one - q)
         + q ** (N - 1) / (one - q) ** 2
     )
+
     f0 = value + symmetric(value_tail)
     f1 = derivative + symmetric(derivative_tail)
     f2 = second + symmetric(second_tail)
@@ -170,6 +199,7 @@ def phi_series(y: Jet2) -> Jet2:
 
 
 def phi_below(x, a, b):
+    """Stable Joukowski quantities for a point x below the cut [a,b]."""
     x, a, b = Jet2.coerce(x), Jet2.coerce(a), Jet2.coerce(b)
     midpoint = (a + b) / 2
     root = ((a - x) * (b - x)).sqrt()
@@ -177,6 +207,7 @@ def phi_below(x, a, b):
 
 
 def left_contact_coefficients(r: Jet2, h: Jet2):
+    """Return l0,l1 such that L(r,h,C)=l0+l1*C."""
     z = r - D + h
     beta = 1 + h / 2
     a = ALPHA + h
@@ -194,20 +225,20 @@ def left_contact_coefficients(r: Jet2, h: Jet2):
     delta = D - h
     f_z = -(z - ALPHA) / delta
     f_r = (r - ALPHA) / delta
-
     l0 = -(-w / 2).log() - z * f_z * J_z - r * f_r * J_r
     l1 = -(f_z * J_z + f_r * J_r)
     return l0, l1
 
 
 def right_contact_coefficients(r: Jet2, h: Jet2):
+    """Return q0,q1 such that R(r,h,C)=q0+q1*C."""
     z = r - D + h
     beta = 1 + h / 2
     a = Jet2.const(ALPHA)
     b = 1 - h / 2
+
     half_length = (b - a) / 2
     w = -half_length
-
     phi_z, psi_z, S_z = phi_below(z, a, b)
     phi_r, psi_r, S_r = phi_below(r, a, b)
     log_z = ((w - phi_z) / (psi_z - w)).log()
@@ -215,10 +246,13 @@ def right_contact_coefficients(r: Jet2, h: Jet2):
 
     y = h / (beta - a)
     terminal = 2 * h * phi_series(y)
-
     terms = (S_z * log_z, S_r * log_r, terminal)
     poles = (z, r, beta)
-    denoms = ((z - r) * (z - beta), (r - z) * (r - beta), (beta - z) * (beta - r))
+    denoms = (
+        (z - r) * (z - beta),
+        (r - z) * (r - beta),
+        (beta - z) * (beta - r),
+    )
 
     q0 = -(half_length / 2).log()
     q1 = Jet2.const(0)
@@ -229,6 +263,7 @@ def right_contact_coefficients(r: Jet2, h: Jet2):
 
 
 def quantities(r: Jet2, h: Jet2):
+    """Return Q=L(C0), R_C, -z-C0, and L(C=1)."""
     l0, l1 = left_contact_coefficients(r, h)
     q0, q1 = right_contact_coefficients(r, h)
     C0 = -q0 / q1
@@ -257,9 +292,15 @@ class Box:
         hw = self.h1 - self.h0
         if rw >= hw:
             m = (self.r0 + self.r1) / 2
-            return Box(self.r0, m, self.h0, self.h1, self.depth + 1), Box(m, self.r1, self.h0, self.h1, self.depth + 1)
+            return (
+                Box(self.r0, m, self.h0, self.h1, self.depth + 1),
+                Box(m, self.r1, self.h0, self.h1, self.depth + 1),
+            )
         m = (self.h0 + self.h1) / 2
-        return Box(self.r0, self.r1, self.h0, m, self.depth + 1), Box(self.r0, self.r1, m, self.h1, self.depth + 1)
+        return (
+            Box(self.r0, self.r1, self.h0, m, self.depth + 1),
+            Box(self.r0, self.r1, m, self.h1, self.depth + 1),
+        )
 
 
 def center_and_interval(box: Box):
@@ -273,19 +314,35 @@ def center_and_interval(box: Box):
 
 
 def lower_value(center: Jet2, enclosure: Jet2, radii):
-    return center.v - abs_upper(enclosure.g[0]) * radii[0] - abs_upper(enclosure.g[1]) * radii[1]
+    return (
+        center.v
+        - abs_upper(enclosure.g[0]) * radii[0]
+        - abs_upper(enclosure.g[1]) * radii[1]
+    )
 
 
 def upper_value(center: Jet2, enclosure: Jet2, radii):
-    return center.v + abs_upper(enclosure.g[0]) * radii[0] + abs_upper(enclosure.g[1]) * radii[1]
+    return (
+        center.v
+        + abs_upper(enclosure.g[0]) * radii[0]
+        + abs_upper(enclosure.g[1]) * radii[1]
+    )
 
 
 def lower_derivative(center: Jet2, enclosure: Jet2, component: int, radii):
-    return center.g[component] - abs_upper(enclosure.H[component][0]) * radii[0] - abs_upper(enclosure.H[component][1]) * radii[1]
+    return (
+        center.g[component]
+        - abs_upper(enclosure.H[component][0]) * radii[0]
+        - abs_upper(enclosure.H[component][1]) * radii[1]
+    )
 
 
 def upper_derivative(center: Jet2, enclosure: Jet2, component: int, radii):
-    return center.g[component] + abs_upper(enclosure.H[component][0]) * radii[0] + abs_upper(enclosure.H[component][1]) * radii[1]
+    return (
+        center.g[component]
+        + abs_upper(enclosure.H[component][0]) * radii[0]
+        + abs_upper(enclosure.H[component][1]) * radii[1]
+    )
 
 
 def lower_direction(center: Jet2, enclosure: Jet2, coeffs, radii):
@@ -297,6 +354,7 @@ def lower_direction(center: Jet2, enclosure: Jet2, coeffs, radii):
 
 
 def certify_square():
+    """Certify the five two-variable inequalities on [0,0.127]^2."""
     queue = deque([Box(Fraction(0), BOUND, Fraction(0), BOUND)])
     passed = 0
     extrema = {
@@ -306,6 +364,7 @@ def certify_square():
         "L1_r": None,
         "L1_h_minus_r": None,
     }
+
     while queue:
         box = queue.popleft()
         try:
@@ -329,6 +388,7 @@ def certify_square():
         except (ValueError, ZeroDivisionError):
             ok = False
             bounds = {}
+
         if ok:
             passed += 1
             for name, val in bounds.items():
@@ -337,25 +397,31 @@ def certify_square():
                 elif name == "L1_r":
                     if val.upper() > extrema[name].upper():
                         extrema[name] = val
-                else:
-                    if val.lower() < extrema[name].lower():
-                        extrema[name] = val
+                elif val.lower() < extrema[name].lower():
+                    extrema[name] = val
             continue
+
         if box.depth >= MAX_DEPTH:
-            raise AssertionError(f"Failed to certify box at depth {box.depth}: {box}; bounds={bounds}")
+            raise AssertionError(
+                f"Failed to certify box at depth {box.depth}: {box}; bounds={bounds}"
+            )
         queue.extend(box.split())
-    print(f"PASS: five two-variable endpoint inequalities on [0,0.127]^2 ({passed} boxes)")
+
+    print(
+        f"PASS: five two-variable endpoint inequalities on [0,0.127]^2 "
+        f"({passed} boxes)"
+    )
     for name, value in extrema.items():
         endpoint = value.upper() if name == "L1_r" else value.lower()
-        endpoint = value.upper() if name == "L1_r" else value.lower()
-        print(f"  certified extremal bound {name}: {endpoint}")
+        print(f" certified extremal bound {name}: {endpoint}")
 
 
 def certify_convexity():
-    # Direct interval enclosure of Q_rr on h=0, with adaptive 1D subdivision.
+    """Certify d^2_r L(r,0,C0(r,0))>0 on [0,0.127]."""
     intervals = deque([(Fraction(0), BOUND, 0)])
     passed = 0
     minimum = None
+
     while intervals:
         lo, hi, depth = intervals.popleft()
         r = Jet2.variable(interval(lo, hi), 0)
@@ -367,39 +433,56 @@ def certify_convexity():
         except (ValueError, ZeroDivisionError):
             ok = False
             val = None
+
         if ok:
             passed += 1
             if minimum is None or val.lower() < minimum.lower():
                 minimum = val
             continue
+
         if depth >= MAX_DEPTH:
-            raise AssertionError(f"Failed Q_rr interval [{lo},{hi}] at depth {depth}: {val}")
+            raise AssertionError(
+                f"Failed Q_rr interval [{lo},{hi}] at depth {depth}: {val}"
+            )
         mid = (lo + hi) / 2
         intervals.append((lo, mid, depth + 1))
         intervals.append((mid, hi, depth + 1))
+
     print(f"PASS: Q_rr(r,0)>0 on [0,0.127] ({passed} intervals)")
-    print(f"  certified lower bound Q_rr: {minimum.lower()}")
+    print(f" certified lower bound Q_rr: {minimum.lower()}")
 
 
 def certify_boundary_value():
+    """Certify L(D-1.708,0,1)>0."""
     r = Jet2.variable(D - arb("1.708"), 0)
     h = Jet2.variable(arb(0), 1)
     l0, l1 = left_contact_coefficients(r, h)
     val = (l0 + l1).v
     if not (val.lower() > 0):
         raise AssertionError(f"Boundary value not positive: {val}")
-    print(f"PASS: U_lambda_TL,1(-1) at (D-1.708,0) > 0: {val}")
+    print(f"PASS: L(D-1.708,0,1)>0: {val}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--workers", type=int, default=1, help="accepted for compatibility; current implementation is deterministic serial")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="accepted for compatibility; the implementation is deterministic serial",
+    )
     parser.parse_args()
+
+    if not ((D - arb("1.708")).upper() < arb("0.127")):
+        raise AssertionError("Imported D does not certify D-1.708<0.127")
+
     print(f"Arb precision: {BITS} bits; Phi terms: {SERIES_TERMS}")
+    print(f"Imported alpha enclosure: {ALPHA}")
+    print(f"Imported D enclosure: {D}")
     certify_square()
     certify_convexity()
     certify_boundary_value()
-    print("PASS: all endpoint inequalities")
+    print("PASS: all endpoint inequalities in Lemma 6.1")
 
 
 if __name__ == "__main__":
