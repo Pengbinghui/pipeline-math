@@ -1,0 +1,55 @@
+name: lean-verify
+
+# Builds and verifies every Lean 4 formalization in this repo on each push / PR.
+# Each package under lean/ is an independent Lake project with its own lean-toolchain
+# and pinned Mathlib, so they run as a fail-fast:false matrix — one job per package,
+# and a failure in one never masks the others.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: ${{ matrix.problem }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        problem:
+          - problem-4b-formalization
+          - problem-20-formalization
+          - problem-27b-form
+          - problem-30c-formalization
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Sets up elan from the package's own lean-toolchain, fetches the Mathlib cache
+      # (no building Mathlib from source), then `lake build` — the proofs compile here.
+      - name: Build (lean-action)
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean/${{ matrix.problem }}
+          use-mathlib-cache: true
+          test: false
+          lint: false
+
+      # The repo's own per-package checker (where present): re-builds clean, restricts
+      # `#print axioms`, and gates each theorem against its frozen statement. problem-27b-form
+      # ships no scripts/verify.sh yet, so the build step above is its verification.
+      - name: Project verify.sh (if present)
+        working-directory: lean/${{ matrix.problem }}
+        run: |
+          if [ -f scripts/verify.sh ]; then
+            chmod +x scripts/verify.sh
+            ./scripts/verify.sh --no-log --all
+          else
+            echo "No scripts/verify.sh in ${{ matrix.problem }} — the lake build above is the verification."
+          fi

@@ -1,3 +1,5 @@
+[![lean-verify](https://github.com/Pengbinghui/pipeline-math/actions/workflows/lean-ci.yml/badge.svg)](https://github.com/Pengbinghui/pipeline-math/actions/workflows/lean-ci.yml)
+
 This repository collects resolutions of a number of open problems from the [COLT
 open-problem track](https://learningtheory.org/),
 [commutative ring theory](https://www2.math.uconn.edu/~glaz/Publications_Selected%20Articles/OpenProblemsInCommutativeRingTheory.Springer14.pdf), [Erdős problem](https://www.erdosproblems.com/) and an open question from a [FOCS 2023 paper](https://ieeexplore.ieee.org/document/10353183) by the authors.
